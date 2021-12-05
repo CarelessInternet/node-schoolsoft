@@ -18,7 +18,6 @@ it('get school list', () => {
 
 it('should login', () => {
 	return school.login().then((data) => {
-		console.log('token', data);
 		expect(data).toBeInstanceOf(Object);
 		expect(data.token).toBeDefined();
 	});
@@ -26,7 +25,6 @@ it('should login', () => {
 
 it('should fetch lunch', () => {
 	return school.getLunch().then((data) => {
-		console.log('lunch', data);
 		expect(data).toBeInstanceOf(Array);
 	});
 });
