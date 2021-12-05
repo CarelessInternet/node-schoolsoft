@@ -1,4 +1,4 @@
-name: TypeScript Load Files
+name: TypeScript Test
 
 on:
   push:
