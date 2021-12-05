@@ -10,31 +10,23 @@ const school = new SchoolSoft(
 );
 
 it('get school list', () => {
-	return SchoolSoft.getSchoolList()
-		.then((data) => {
-			expect(data).toBeInstanceOf(Array);
-			expect(data[0]).toBeDefined();
-		})
-		.catch(console.error);
+	return SchoolSoft.getSchoolList().then((data) => {
+		expect(data).toBeInstanceOf(Array);
+		expect(data[0]).toBeDefined();
+	});
 });
 
 it('should login', () => {
-	return school
-		.login()
-		.then((data) => {
-			console.log('token', data);
-			expect(data).toBeInstanceOf(Object);
-			expect(data.token).toBeDefined();
-		})
-		.catch(console.error);
+	return school.login().then((data) => {
+		console.log('token', data);
+		expect(data).toBeInstanceOf(Object);
+		expect(data.token).toBeDefined();
+	});
 });
 
 it('should fetch lunch', () => {
-	return school
-		.getLunch()
-		.then((data) => {
-			console.log('lunch', data);
-			expect(data).toBeInstanceOf(Array);
-		})
-		.catch(console.error);
+	return school.getLunch().then((data) => {
+		console.log('lunch', data);
+		expect(data).toBeInstanceOf(Array);
+	});
 });
