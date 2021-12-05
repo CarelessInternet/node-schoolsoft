@@ -1,0 +1,49 @@
+{
+	"name": "schoolsoft",
+	"version": "1.0.0",
+	"description": "Unofficial reverse enginereed SchoolSoft API",
+	"main": "./dist/index.js",
+	"types": "./dist/types/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest",
+		"format": "prettier --write \"src/**/*.ts\"",
+		"lint": "eslint . --ext .ts",
+		"prepublishOnly": "npm run format && npm run lint && npm run build"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CarelessInternet/node-schoolsoft.git"
+	},
+	"keywords": [
+		"schoolsoft",
+		"api",
+		"wrapper"
+	],
+	"author": "CarelessInternet",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/CarelessInternet/node-schoolsoft/issues"
+	},
+	"homepage": "https://github.com/CarelessInternet/node-schoolsoft#readme",
+	"dependencies": {
+		"axios": "^0.24.0"
+	},
+	"devDependencies": {
+		"@types/jest": "^27.0.3",
+		"@types/node": "^16.11.11",
+		"@typescript-eslint/eslint-plugin": "^5.5.0",
+		"@typescript-eslint/parser": "^5.5.0",
+		"dotenv": "^10.0.0",
+		"eslint": "^8.4.0",
+		"jest": "^27.4.3",
+		"prettier": "^2.5.1",
+		"typescript": "^4.5.2"
+	},
+	"engines": {
+		"node": ">=7.10.1"
+	},
+	"files": [
+		"./dist/**/*"
+	]
+}
