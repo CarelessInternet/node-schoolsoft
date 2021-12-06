@@ -9,7 +9,7 @@ const school = new SchoolSoft(
 	process.env.SCHOOL
 );
 
-it('get school list', () => {
+it('should get school list', () => {
 	return SchoolSoft.getSchoolList().then((data) => {
 		expect(data).toBeInstanceOf(Array);
 		expect(data[0]).toBeDefined();
@@ -32,7 +32,30 @@ it('should fetch user info', () => {
 
 it('should fetch lunch', () => {
 	return school.getLunch().then((data) => {
-		// lunch might not be there, but we have to makes sure it's at least an array
+		// lunch might be empty
 		expect(data).toBeInstanceOf(Array);
+	});
+});
+
+it('should fetch schedule', () => {
+	return school.getSchedule().then((data) => {
+		// schedule might be empty
+		expect(data).toBeInstanceOf(Array);
+	});
+});
+
+it('should fetch absences (default 1-52)', () => {
+	return school.getAbsences().then((data) => {
+		expect(data).toBeInstanceOf(Array);
+		expect(data[0]).toBeInstanceOf(Object);
+		expect(data[0].lessonIds).toBeInstanceOf(Array);
+	});
+});
+
+it('should fetch absences (40)', () => {
+	return school.getAbsences(40).then((data) => {
+		expect(data).toBeInstanceOf(Array);
+		expect(data[0]).toBeInstanceOf(Object);
+		expect(data[0].lessonIds).toBeInstanceOf(Array);
 	});
 });

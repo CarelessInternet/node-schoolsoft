@@ -1,5 +1,12 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { User, SchoolListInfo, Token, Lunch } from './types';
+import {
+	User,
+	SchoolListInfo,
+	Token,
+	Lunch,
+	Schedule,
+	Absences
+} from './types';
 
 /**
  * The SchoolSoft class, where all the magic happens
@@ -20,8 +27,7 @@ export default class SchoolSoft {
 		headers: {
 			appos: 'ios',
 			appversion: '2.3.8',
-			deviceid: 'value doesnt matter but the key is needed',
-			'Content-Type': 'application/x-www-form-urlencoded'
+			deviceid: 'value doesnt matter but the key is needed'
 		},
 		validateStatus: () => true
 	};
@@ -67,14 +73,23 @@ export default class SchoolSoft {
 	}
 
 	private _checkReponse(status: number) {
-		if (status === 401) {
-			throw new Error('Invalid username, password, or token');
-		} else if (status === 404) {
-			throw new URIError('Invalid parameters passed to the API');
-		} else if (status >= 500) {
-			throw new Error(
-				'An internal SchoolSoft error occured whilst making a request'
-			);
+		switch (status) {
+			case 401:
+				throw new Error('Invalid username, password, or token');
+			case 404:
+				throw new URIError('Invalid parameters passed to the API');
+			case 405:
+				throw new URIError('Wrong method requested to the API');
+			case 415:
+				throw new Error(
+					'An unsupported media type was requested as the Content-Type header'
+				);
+			case 500:
+				throw new Error(
+					'An internal SchoolSoft error occured whilst making a request'
+				);
+			default:
+				break;
 		}
 	}
 
@@ -115,10 +130,16 @@ export default class SchoolSoft {
 		this._baseAxiosOptions.headers!['Cookie'] =
 			preResponse.headers['set-cookie']![0].split(';')[0];
 
+		const options = Object.assign({}, this._baseAxiosOptions, {
+			headers: Object.assign({}, this._baseAxiosOptions.headers, {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			})
+		});
+
 		const response = await axios.post(
 			`${this._url}/rest/app/login`,
 			formData,
-			this._baseAxiosOptions
+			options
 		);
 		this._checkReponse(response.status);
 
@@ -175,11 +196,49 @@ export default class SchoolSoft {
 		this._checkForUser();
 
 		const response = await axios.get(
-			`${this._url}/api/lunchmenus/student/${this._user.orgs[0].orgId}`,
+			`${this._url}/api/lunchmenus/${this.userType}/${this._user.orgs[0].orgId}`,
 			this._baseAxiosOptions
 		);
 		this._checkReponse(response.status);
 
 		return response.data as Lunch[];
 	}
+
+	/**
+	 * Gets the schedule
+	 */
+	public async getSchedule(): Promise<Schedule[]> {
+		this._checkForUser();
+
+		const response = await axios.get(
+			`${this._url}/api/lessons/${this.userType}/${this._user.orgs[0].orgId}`,
+			this._baseAxiosOptions
+		);
+		this._checkReponse(response.status);
+
+		return response.data as Schedule[];
+	}
+
+	/**
+	 * Gets absences from school
+	 * @param start - The starting week as integer
+	 * @param end - The ending week as integer
+	 */
+	public async getAbsences(start = 1, end = 52): Promise<Absences[]> {
+		this._checkForUser();
+
+		if (end === undefined || end === null) {
+			end = 52;
+		}
+
+		const response = await axios.get(
+			`${this._url}/api/absences/${this.userType}/${this._user.orgs[0].orgId}/${start}/${end}`,
+			this._baseAxiosOptions
+		);
+		this._checkReponse(response.status);
+
+		return response.data as Absences[];
+	}
 }
+
+export * from './types';
