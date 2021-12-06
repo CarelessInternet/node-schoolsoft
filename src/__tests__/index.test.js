@@ -23,8 +23,16 @@ it('should login', () => {
 	});
 });
 
+it('should fetch user info', () => {
+	return school.getUser().then((data) => {
+		expect(data).toBeInstanceOf(Object);
+		expect(data.userId).toEqual(expect.any(Number));
+	});
+});
+
 it('should fetch lunch', () => {
 	return school.getLunch().then((data) => {
+		// lunch might not be there, but we have to makes sure it's at least an array
 		expect(data).toBeInstanceOf(Array);
 	});
 });

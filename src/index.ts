@@ -12,7 +12,7 @@ export default class SchoolSoft {
 	/**
 	 * User info
 	 */
-	public user: User | null;
+	private _user: User;
 	/**
 	 * axios http options
 	 */
@@ -78,6 +78,12 @@ export default class SchoolSoft {
 		}
 	}
 
+	private _checkForUser() {
+		if (!this._user) {
+			throw new ReferenceError('Missing login/user information');
+		}
+	}
+
 	/**
 	 * Gets all of the schools that uses SchoolSoft
 	 */
@@ -116,7 +122,7 @@ export default class SchoolSoft {
 		);
 		this._checkReponse(response.status);
 
-		this.user = response.data as User;
+		this._user = response.data as User;
 		const token = await this.token();
 
 		return token;
@@ -126,19 +132,17 @@ export default class SchoolSoft {
 	 * Gets the token, assuming you have the app key
 	 */
 	public async token(): Promise<Token> {
-		if (!this.user) {
-			throw new ReferenceError('Missing login/user information');
-		}
+		this._checkForUser();
 
 		const options = Object.assign({}, this._baseAxiosOptions, {
 			headers: Object.assign({}, this._baseAxiosOptions.headers, {
-				appkey: this.user.appKey
+				appkey: this._user.appKey
 			})
 		});
-		const request = await axios.get(`${this._url}/rest/app/token`, options);
-		this._checkReponse(request.status);
+		const response = await axios.get(`${this._url}/rest/app/token`, options);
+		this._checkReponse(response.status);
 
-		const data = request.data as Token;
+		const data = response.data as Token;
 
 		this._baseAxiosOptions = Object.assign({}, this._baseAxiosOptions, {
 			headers: Object.assign({}, this._baseAxiosOptions.headers, {
@@ -150,19 +154,32 @@ export default class SchoolSoft {
 	}
 
 	/**
+	 * Gets the user's info
+	 */
+	public async getUser(): Promise<User> {
+		this._checkForUser();
+
+		const response = await axios.get(
+			`${this._url}/api/user/get`,
+			this._baseAxiosOptions
+		);
+		this._checkReponse(response.status);
+
+		return response.data as User;
+	}
+
+	/**
 	 * Gets the lunch menu
 	 */
 	public async getLunch(): Promise<Lunch[]> {
-		if (!this.user) {
-			throw new ReferenceError('Missing login/user information');
-		}
+		this._checkForUser();
 
-		const request = await axios.get(
-			`${this._url}/api/lunchmenus/student/${this.user.orgs[0].orgId}`,
+		const response = await axios.get(
+			`${this._url}/api/lunchmenus/student/${this._user.orgs[0].orgId}`,
 			this._baseAxiosOptions
 		);
-		this._checkReponse(request.status);
+		this._checkReponse(response.status);
 
-		return request.data as Lunch[];
+		return response.data as Lunch[];
 	}
 }
