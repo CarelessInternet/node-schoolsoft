@@ -128,7 +128,9 @@ export default class SchoolSoft {
 			this._baseAxiosOptions
 		);
 		this._baseAxiosOptions.headers!['Cookie'] =
-			preResponse.headers['set-cookie']![0].split(';')[0];
+			preResponse.headers['set-cookie']?.[0].split(';')[0] ??
+			// this is just a random string from password generator, not a real password or session id
+			'JSESSIONID=97oatxRBCX4pbEDkNeoxGFx8tRRh5Efz';
 
 		const options = Object.assign({}, this._baseAxiosOptions, {
 			headers: Object.assign({}, this._baseAxiosOptions.headers, {
