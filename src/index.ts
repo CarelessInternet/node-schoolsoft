@@ -5,7 +5,8 @@ import {
 	Token,
 	Lunch,
 	Schedule,
-	Absences
+	Absences,
+	AbsencePermissions
 } from './types';
 
 /**
@@ -240,6 +241,21 @@ export default class SchoolSoft {
 		this._checkReponse(response.status);
 
 		return response.data as Absences[];
+	}
+
+	/**
+	 * Gets absence permissions
+	 */
+	public async getAbsencePermissions(): Promise<AbsencePermissions> {
+		this._checkForUser();
+
+		const response = await axios.get(
+			`${this._url}/api/parameters/${this.userType}/${this._user.orgs[0].orgId}`,
+			this._baseAxiosOptions
+		);
+		this._checkReponse(response.status);
+
+		return response.data as AbsencePermissions;
 	}
 }
 

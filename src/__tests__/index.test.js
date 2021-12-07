@@ -59,3 +59,11 @@ it('should fetch absences (40)', () => {
 		expect(data[0].lessonIds).toBeInstanceOf(Array);
 	});
 });
+
+it('should fetch absence permissions', () => {
+	return school.getAbsencePermissions().then((data) => {
+		expect(data).toBeInstanceOf(Object);
+		expect(data.studentChangeAbsence).toEqual(expect.any(Boolean));
+		expect(data.messagingLevel).toEqual(expect.any(Number));
+	});
+});
