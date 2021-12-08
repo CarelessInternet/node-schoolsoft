@@ -73,7 +73,7 @@ export default class SchoolSoft {
 			.join('&');
 	}
 
-	private _checkReponse(status: number) {
+	private _checkResponse(status: number) {
 		switch (status) {
 			case 401:
 				throw new Error('Invalid username, password, or token');
@@ -146,7 +146,7 @@ export default class SchoolSoft {
 			formData,
 			options
 		);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		this._user = response.data as User;
 		const token = await this.token();
@@ -166,7 +166,7 @@ export default class SchoolSoft {
 			})
 		});
 		const response = await axios.get(`${this._url}/rest/app/token`, options);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		const data = response.data as Token;
 
@@ -189,7 +189,7 @@ export default class SchoolSoft {
 			`${this._url}/api/user/get`,
 			this._baseAxiosOptions
 		);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		return response.data as User;
 	}
@@ -204,7 +204,7 @@ export default class SchoolSoft {
 			`${this._url}/api/lunchmenus/${this.userType}/${this._user.orgs[0].orgId}`,
 			this._baseAxiosOptions
 		);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		return response.data as Lunch[];
 	}
@@ -219,7 +219,7 @@ export default class SchoolSoft {
 			`${this._url}/api/lessons/${this.userType}/${this._user.orgs[0].orgId}`,
 			this._baseAxiosOptions
 		);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		return response.data as Schedule[];
 	}
@@ -240,7 +240,7 @@ export default class SchoolSoft {
 			`${this._url}/api/absences/${this.userType}/${this._user.orgs[0].orgId}/${start}/${end}`,
 			this._baseAxiosOptions
 		);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		return response.data as Absences[];
 	}
@@ -255,7 +255,7 @@ export default class SchoolSoft {
 			`${this._url}/api/parameters/${this.userType}/${this._user.orgs[0].orgId}`,
 			this._baseAxiosOptions
 		);
-		this._checkReponse(response.status);
+		this._checkResponse(response.status);
 
 		return response.data as AbsencePermissions;
 	}
