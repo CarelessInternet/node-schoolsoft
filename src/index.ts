@@ -78,7 +78,9 @@ export default class SchoolSoft {
 			case 401:
 				throw new Error('Invalid username, password, or token');
 			case 404:
-				throw new URIError('Invalid parameters passed to the API');
+				throw new URIError(
+					'Resource could not been found, either invalid URL or parameters passed'
+				);
 			case 405:
 				throw new URIError('Wrong method requested to the API');
 			case 415:
