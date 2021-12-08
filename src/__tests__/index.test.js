@@ -26,7 +26,7 @@ it('should login', () => {
 it('should fetch user info', () => {
 	return school.getUser().then((data) => {
 		expect(data).toBeInstanceOf(Object);
-		expect(data.userId).toEqual(expect.any(Number));
+		expect(typeof data.userId).toBe('number');
 	});
 });
 
@@ -44,7 +44,7 @@ it('should fetch schedule', () => {
 	});
 });
 
-it('should fetch absences (default 1-52)', () => {
+it('should fetch absences [default 1-52]', () => {
 	return school.getAbsences().then((data) => {
 		expect(data).toBeInstanceOf(Array);
 		expect(data[0]).toBeInstanceOf(Object);
@@ -52,7 +52,7 @@ it('should fetch absences (default 1-52)', () => {
 	});
 });
 
-it('should fetch absences (40)', () => {
+it('should fetch absences [40]', () => {
 	return school.getAbsences(40).then((data) => {
 		expect(data).toBeInstanceOf(Array);
 		expect(data[0]).toBeInstanceOf(Object);
@@ -63,7 +63,17 @@ it('should fetch absences (40)', () => {
 it('should fetch absence permissions', () => {
 	return school.getAbsencePermissions().then((data) => {
 		expect(data).toBeInstanceOf(Object);
-		expect(data.studentChangeAbsence).toEqual(expect.any(Boolean));
-		expect(data.messagingLevel).toEqual(expect.any(Number));
+		expect(typeof data.studentChangeAbsence).toBe('boolean');
+		expect(typeof data.messagingLevel).toBe('number');
 	});
+});
+
+it('should fetch assignments', () => {
+	return school
+		.getAssignments(new Date('2021-08-16'), Date.now())
+		.then((data) => {
+			expect(data).toBeInstanceOf(Array);
+			expect(typeof data[0].id).toBe('number');
+			expect(typeof data[0].json.title).toBe('string');
+		});
 });

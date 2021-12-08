@@ -5,3 +5,4 @@ export { Lunch } from './Lunch';
 export { Schedule } from './Schedule';
 export { Absences } from './Absences';
 export { AbsencePermissions } from './AbsencePermissions';
+export { Assignment } from './Assignment';

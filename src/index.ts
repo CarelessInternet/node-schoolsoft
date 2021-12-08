@@ -6,7 +6,8 @@ import {
 	Lunch,
 	Schedule,
 	Absences,
-	AbsencePermissions
+	AbsencePermissions,
+	Assignment
 } from './types';
 
 /**
@@ -258,6 +259,29 @@ export default class SchoolSoft {
 		this._checkResponse(response.status);
 
 		return response.data as AbsencePermissions;
+	}
+
+	/**
+	 * Gets assignments from a beginning to end date
+	 */
+	public async getAssignments(
+		start: Date | string | number,
+		end: Date | string | number
+	): Promise<Assignment[]> {
+		this._checkForUser();
+
+		const [startDate, endDate] = [
+			new Date(start).getTime(),
+			new Date(end).getTime()
+		];
+
+		const response = await axios.get(
+			`${this._url}/api/notices/${this.userType}/${this._user.orgs[0].orgId}/${startDate}/${endDate}/test`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as Assignment[];
 	}
 }
 
