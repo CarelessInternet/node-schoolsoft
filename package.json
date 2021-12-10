@@ -1,6 +1,6 @@
 {
 	"name": "schoolsoft",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Unofficial reverse enginereed SchoolSoft API",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -44,6 +44,6 @@
 		"node": ">=7.10.1"
 	},
 	"files": [
-		"./dist/**/*"
+		"dist/**/*"
 	]
 }
