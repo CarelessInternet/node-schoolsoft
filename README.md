@@ -2,6 +2,32 @@
 
 SchoolSoft API wrapper for both browser and NodeJS!
 
+## Disclaimer
+
+This has not been tested with guardian nor staff accounts, so please be aware that it might not work for those
+
+## Documentation
+
+Documentation can be found in the [wiki section](https://github.com/CarelessInternet/node-schoolsoft/wiki)
+
+## Installation
+
+```bash
+npm i schoolsoft
+```
+
+## Testing
+
+Testing is implemented with `jest`, and run against test cases on every push commit.
+
+### Manually Testing
+
+1. Create a `.env` file with the following environment variables:
+  * SCHOOL
+  * SCHOOL_USERNAME
+  * SCHOOL_PASSWORD
+
+2. Run the test cases with `npm test`
 ## Credits
 
-Thank you to [this repository](https://github.com/Blatzar/schoolsoft-api-app) for giving me a head start.
+Thank you to [this repository](https://github.com/Blatzar/schoolsoft-api-app) for giving me a head start
