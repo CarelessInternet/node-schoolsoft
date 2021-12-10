@@ -5,7 +5,7 @@ import {
 	Token,
 	Lunch,
 	Schedule,
-	Absences,
+	Absence,
 	AbsencePermissions,
 	Assignment
 } from './types';
@@ -230,7 +230,7 @@ export default class SchoolSoft {
 	 * @param start - The starting week as integer
 	 * @param end - The ending week as integer
 	 */
-	public async getAbsences(start = 1, end = 52): Promise<Absences[]> {
+	public async getAbsences(start = 1, end = 52): Promise<Absence[]> {
 		this._checkForUser();
 
 		if (end === undefined || end === null) {
@@ -243,7 +243,7 @@ export default class SchoolSoft {
 		);
 		this._checkResponse(response.status);
 
-		return response.data as Absences[];
+		return response.data as Absence[];
 	}
 
 	/**

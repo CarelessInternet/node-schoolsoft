@@ -1,7 +1,7 @@
 /**
  * Absences API response
  */
-export interface Absences {
+export interface Absence {
 	week: number;
 	lessonIds: number[];
 	dayIds: number[];
