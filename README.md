@@ -1,3 +1,14 @@
+<div align="center">
+  <img src="https://img.shields.io/npm/v/schoolsoft">
+  <img src="https://img.shields.io/npm/l/schoolsoft">
+  <img src="https://img.shields.io/node/v/schoolsoft?color=orange">
+  <img src="https://img.shields.io/npm/dw/schoolsoft">
+  <img src="https://img.shields.io/npm/types/schoolsoft">
+  <img src="https://img.shields.io/github/commit-activity/m/CarelessInternet/node-schoolsoft?color=red">
+  <img src="https://img.shields.io/github/issues/CarelessInternet/node-schoolsoft">
+  <img src="https://img.shields.io/github/issues-pr/CarelessInternet/node-schoolsoft?color=yellow">
+</div>
+
 # node-schoolsoft
 
 SchoolSoft API wrapper for both browser and NodeJS!
