@@ -11,7 +11,7 @@
 
 # node-schoolsoft
 
-SchoolSoft API wrapper for both browser and NodeJS!
+SchoolSoft API wrapper for both browser and Node.js!
 
 ## Disclaimer
 
