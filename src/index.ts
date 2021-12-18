@@ -7,7 +7,13 @@ import {
 	Schedule,
 	Absence,
 	AbsencePermissions,
-	Assignment
+	Assignment,
+	LessonStatus,
+	Calendar,
+	NoticeLimit,
+	NoticeActionable,
+	AssignmentResult,
+	NewsInfo
 } from './types';
 
 /**
@@ -31,6 +37,7 @@ export default class SchoolSoft {
 			appversion: '2.3.8',
 			deviceid: 'value doesnt matter but the key is needed'
 		},
+		withCredentials: true,
 		validateStatus: () => true
 	};
 
@@ -77,7 +84,9 @@ export default class SchoolSoft {
 	private _checkResponse(status: number) {
 		switch (status) {
 			case 401:
-				throw new Error('Invalid username, password, or token');
+				throw new Error(
+					'Invalid username, password, token, or missing permissions'
+				);
 			case 404:
 				throw new URIError(
 					'Resource could not been found, either invalid URL or parameters passed'
@@ -263,6 +272,8 @@ export default class SchoolSoft {
 
 	/**
 	 * Gets assignments from a beginning to end date
+	 * @param start - The starting date
+	 * @param end - The ending date
 	 */
 	public async getAssignments(
 		start: Date | string | number,
@@ -282,6 +293,162 @@ export default class SchoolSoft {
 		this._checkResponse(response.status);
 
 		return response.data as Assignment[];
+	}
+
+	/**
+	 * Gets the lessons' statuses
+	 * @param start - The starting date
+	 * @param end - The ending date
+	 * @param amountOfLessons - The amount of lessons in the day
+	 */
+	public async getLessonsStatuses(
+		start: Date | string | number,
+		end: Date | string | number,
+		amountOfLessons = 5
+	): Promise<LessonStatus[]> {
+		this._checkForUser();
+
+		const [startDate, endDate] = [
+			new Date(start).getTime(),
+			new Date(end).getTime()
+		];
+
+		const parameters: string[] = [];
+		for (let i = 1; i <= amountOfLessons; i++) {
+			parameters.push(`lessonstatus${this.userType}_${i}`);
+		}
+
+		const response = await axios.get(
+			`${this._url}/api/notices/${this.userType}/${
+				this._user.orgs[0].orgId
+			}/${startDate}/${endDate}/${parameters.join(',')}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as LessonStatus[];
+	}
+
+	/**
+	 * Gets the calendar
+	 * @param start - The starting week
+	 * @param end - The ending week
+	 * @param parameters - The types of calendar events
+	 */
+	public async getCalendar(
+		start: Date | string | number,
+		end: Date | string | number,
+		parameters: Array<'calendar' | 'schoolcalendar' | 'privatecalendar'>
+	): Promise<Calendar[]> {
+		this._checkForUser();
+
+		const [startDate, endDate] = [
+			new Date(start).getTime(),
+			new Date(end).getTime()
+		];
+		const urlParameters = [...new Set(parameters)].join(',');
+
+		const response = await axios.get(
+			`${this._url}/api/notices/${this.userType}/${this._user.orgs[0].orgId}/${startDate}/${endDate}/${urlParameters}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as Calendar[];
+	}
+
+	/**
+	 * Gets the notices which you cannot perform actions on
+	 * @param parameters - The types of notices
+	 */
+	public async getNoticesLimit(
+		parameters: Array<
+			'news' | 'forum' | 'forummessage' | 'inquiry' | 'teststudent'
+		>
+	): Promise<NoticeLimit> {
+		this._checkForUser();
+
+		const urlParameters = [...new Set(parameters)].join(',');
+
+		// idk what the 0 & 52 (originally 0 & 30) means in the url, i literally cant figure it out
+		// i highly doubt it's the week number since i manually changed it and there was no pattern
+		const response = await axios.get(
+			`${this._url}/api/notices/${this.userType}/limit/${this._user.orgs[0].orgId}/0/52/${urlParameters}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as NoticeLimit;
+	}
+
+	/**
+	 * Gets the notices which you can perform actions on
+	 */
+	public async getNoticesActionable(): Promise<NoticeActionable[]> {
+		this._checkForUser();
+
+		const response = await axios.get(
+			`${this._url}/api/notices/${this.userType}/actionable/${this._user.orgs[0].orgId}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as NoticeActionable[];
+	}
+
+	/**
+	 * Gets the archived notices, returns same typedef as getNoticesLimit()
+	 * @function getNoticesLimit
+	 * @param parameters - The types of notices
+	 */
+	public async getNoticesArchived(
+		parameters: Array<
+			'news' | 'forum' | 'forummessage' | 'inquiry' | 'teststudent'
+		>
+	): Promise<NoticeLimit> {
+		this._checkForUser();
+
+		const urlParameters = [...new Set(parameters)].join(',');
+
+		const response = await axios.get(
+			`${this._url}/api/notices/${this.userType}/limit/archived/${this._user.orgs[0].orgId}/0/52/${urlParameters}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as NoticeLimit;
+	}
+
+	/**
+	 * Gets info/results of an assignment
+	 * @param id - The ID of the assignment
+	 */
+	public async getAssignmentResult(id: number): Promise<AssignmentResult> {
+		this._checkForUser();
+
+		const response = await axios.get(
+			`${this._url}/api/teststudents/${this.userType}/${this._user.orgs[0].orgId}/${id}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as AssignmentResult;
+	}
+
+	/**
+	 * Gets info of one news
+	 * @param id - The ID of the news
+	 */
+	public async getNewsInfo(id: number): Promise<NewsInfo> {
+		this._checkForUser();
+
+		const response = await axios.get(
+			`${this._url}/api/news/${this.userType}/${this._user.orgs[0].orgId}/${id}`,
+			this._baseAxiosOptions
+		);
+		this._checkResponse(response.status);
+
+		return response.data as NewsInfo;
 	}
 }
 

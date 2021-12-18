@@ -1,12 +1,13 @@
 import { BaseNotice } from '.';
 
-export interface Assignment extends BaseNotice {
-	object: 'test';
+export interface Calendar extends BaseNotice {
+	object: 'calendar' | 'schoolcalendar' | 'privatecalendar';
 	json: {
 		/**
 		 * Can be converted to date
 		 */
 		fromDate: string;
+		allDay: number;
 		/**
 		 * Can be converted to date
 		 */
@@ -14,6 +15,5 @@ export interface Assignment extends BaseNotice {
 		creByName: string;
 		contentPreview: string;
 		title: string;
-		studentfileupload?: number;
 	};
 }
