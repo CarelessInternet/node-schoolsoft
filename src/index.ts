@@ -42,7 +42,7 @@ export default class SchoolSoft {
 	};
 
 	/**
-	 * Initializes the SchoolSoft class
+	 * Initializes the SchoolSoft class. If you already have the token and orgId, just set a fake username and password, but keep the school and userType if needed
 	 * @param username - The username of the account
 	 * @param password - The password of the account
 	 * @param school - The school of the account
@@ -187,6 +187,23 @@ export default class SchoolSoft {
 		});
 
 		return data;
+	}
+
+	/**
+	 * Set the token and organization ID if you already have them, meaning you can skip logging in
+	 * @param token - The user's token
+	 * @param orgId - The user's organization ID
+	 */
+	public setTokenAndOrgId(
+		token: Token['token'],
+		orgId: User['orgs'][0]['orgId']
+	): void {
+		this._baseAxiosOptions = Object.assign({}, this._baseAxiosOptions, {
+			headers: Object.assign({}, this._baseAxiosOptions.headers, {
+				token
+			})
+		});
+		this._user = { orgs: [{ orgId }] } as User;
 	}
 
 	/**

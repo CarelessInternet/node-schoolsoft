@@ -9,6 +9,9 @@ const school = new SchoolSoft(
 	process.env.SCHOOL
 );
 
+let token = '';
+let orgId = 0;
+
 it('should fetch school list', () => {
 	return SchoolSoft.getSchoolList().then((data) => {
 		expect(data).toBeInstanceOf(Array);
@@ -20,6 +23,8 @@ it('should login', () => {
 	return school.login().then((data) => {
 		expect(data).toBeInstanceOf(Object);
 		expect(data.token).toBeDefined();
+
+		token = data.token;
 	});
 });
 
@@ -27,6 +32,9 @@ it('should fetch user info', () => {
 	return school.getUser().then((data) => {
 		expect(data).toBeInstanceOf(Object);
 		expect(typeof data.userId).toBe('number');
+		expect(typeof data.name).toBe('string');
+
+		orgId = data.orgs[0].orgId;
 	});
 });
 
@@ -199,4 +207,34 @@ it('should fetch news info', async () => {
 		expect(typeof info.news.orgId).toBe('number');
 		expect(typeof info.news.creDate).toBe('number');
 	}
+});
+
+/* Fetch stuff without the login method, instead using the setTokenAndOrgId() method */
+
+const school2 = new SchoolSoft('', '', process.env.SCHOOL);
+
+it('should fetch user info [without login method]', () => {
+	school2.setTokenAndOrgId(token, orgId);
+	return school2.getUser().then((data) => {
+		expect(data).toBeInstanceOf(Object);
+		expect(typeof data.userId).toBe('number');
+		expect(typeof data.name).toBe('string');
+	});
+});
+
+it('should fetch calendar events [without login method]', () => {
+	return school2
+		.getCalendar(new Date('2021-08-16'), Date.now(), [
+			'calendar',
+			'privatecalendar',
+			'schoolcalendar'
+		])
+		.then((data) => {
+			expect(data).toBeInstanceOf(Array);
+
+			if (data.length) {
+				expect(typeof data[0].json.fromDate).toBe('string');
+				expect(typeof data[0].json.title).toBe('string');
+			}
+		});
 });
