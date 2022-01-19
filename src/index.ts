@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import {
+import axios, { type AxiosRequestConfig } from 'axios';
+import type {
 	User,
 	SchoolListInfo,
 	Token,
