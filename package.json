@@ -27,8 +27,7 @@
 	},
 	"homepage": "https://github.com/CarelessInternet/node-schoolsoft#readme",
 	"dependencies": {
-		"axios": "^0.26.0",
-		"follow-redirects": ">=1.14.7"
+		"axios": "^0.26.0"
 	},
 	"devDependencies": {
 		"@types/jest": "^27.0.3",
