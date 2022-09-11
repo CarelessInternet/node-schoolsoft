@@ -16,6 +16,7 @@ A SchoolSoft API wrapper for both the browser and Node.js!
 ## Features
 
 * Zero dependencies!
+* Built with TypeScript!
 * Utilises the native `fetch` API!
   * Works with the browser, Node.js v18+, and frameworks that implement the `fetch` API like Next.js!
 * Uses ESM instead of CommonJS!
