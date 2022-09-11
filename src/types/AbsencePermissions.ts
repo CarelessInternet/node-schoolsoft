@@ -1,6 +1,6 @@
 export interface AbsencePermissions {
 	messagingLevel: number;
-	absenceReport: boolean;
+	absenceReportP: boolean;
 	studentChangeAbsence: boolean;
 	scheduleDays: number;
 	parentChangeAbsence: boolean;

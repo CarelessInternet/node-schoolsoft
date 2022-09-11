@@ -1,472 +1,416 @@
-import axios, { type AxiosRequestConfig } from 'axios';
+import { fetchAndParse, fetchRequest } from './utils/index.js';
+import { CheckForToken } from './decorators/index.js';
+import { Methods, userTypeFromString, UserTypes } from './enums/index.js';
 import type {
-	User,
-	SchoolListInfo,
-	Token,
-	Lunch,
-	Schedule,
 	Absence,
 	AbsencePermissions,
 	Assignment,
-	LessonStatus,
-	Calendar,
-	NoticeLimit,
-	NoticeActionable,
+	AssignmentInformation,
 	AssignmentResult,
-	NewsInfo
+	BaseNotice,
+	Calendar,
+	CalendarObject,
+	LessonStatus,
+	LunchMenu,
+	NewsItem,
+	NoticeActionable,
+	NoticeLimit,
+	NoticeObject,
+	Schedule,
+	SchoolListInfo,
+	Token,
+	User
 } from './types';
 
+interface CustomRequestInit extends Omit<RequestInit, 'headers'> {
+	headers: {
+		appos: 'ios';
+		appversion: '2.3.12';
+		deviceid: 'node-schoolsoft';
+		appkey?: User['appKey'];
+		token?: Token['token'];
+	};
+}
+
 /**
- * The SchoolSoft class, where all the magic happens
+ * The SchoolSoft class, where all the magic happens.
  */
-export default class SchoolSoft {
+export class SchoolSoft {
 	/**
-	 * Base URL of SchoolSoft
+	 * Base URL of SchoolSoft for schools.
 	 */
-	public static readonly baseURL = 'https://sms.schoolsoft.se';
-	/**
-	 * User info
-	 */
-	private _user: User;
-	/**
-	 * axios http options
-	 */
-	private _baseAxiosOptions: AxiosRequestConfig = {
+	public static readonly baseUrl = 'https://sms.schoolsoft.se';
+
+	public readonly baseFetchOptions: CustomRequestInit = {
 		headers: {
 			appos: 'ios',
-			appversion: '2.3.8',
-			deviceid: 'value doesnt matter but the key is needed'
+			appversion: '2.3.12',
+			// Value doesn't matter, but the key & value is needed.
+			deviceid: 'node-schoolsoft'
 		},
-		withCredentials: true,
-		validateStatus: () => true
+		method: Methods.Get
 	};
 
+	public user: User;
+
 	/**
-	 * Initializes the SchoolSoft class. If you already have the token and orgId, just set a fake username and password, but keep the school and userType if needed
-	 * @param username - The username of the account
-	 * @param password - The password of the account
-	 * @param school - The school of the account
-	 * @param [userType] - The type of the account, not needed if you are a student
+	 * Initializes the SchoolSoft class. Call the `login` method after initializing.
+	 * @param username - The username of the account.
+	 * @param password - The password of the account.
+	 * @param school - The school of the account.
+	 * @param [type] - The type of the account. The default type is student.
 	 */
 	public constructor(
-		private username: string,
-		private password: string,
-		private school: string,
-		private userType: 'student' | 'staff' | 'guardian' = 'student'
+		private readonly username: string,
+		private readonly password: string,
+		private readonly school: string,
+		private type: UserTypes = UserTypes.Student
 	) {}
 
-	private get _type() {
-		switch (this.userType) {
-			case 'guardian':
-				return 2;
-			case 'staff':
-				// idk if it is 3, but i believe it is
-				return 3;
-			default:
-				// student is 1
-				return 1;
-		}
-	}
-
-	private get _url() {
-		return `${SchoolSoft.baseURL}/${this.school}`;
-	}
-
-	private _convertToURLParameters(params: object) {
-		return Object.keys(params)
-			.map(
-				(key) =>
-					`${key}=${encodeURIComponent(params[key as keyof typeof params])}`
-			)
-			.join('&');
-	}
-
-	private _checkResponse(status: number) {
-		switch (status) {
-			case 401:
-				throw new Error(
-					'Invalid username, password, token, or missing permissions'
-				);
-			case 404:
-				throw new URIError(
-					'Resource could not been found, either invalid URL or parameters passed'
-				);
-			case 405:
-				throw new URIError('Wrong method requested to the API');
-			case 415:
-				throw new Error(
-					'An unsupported media type was requested as the Content-Type header'
-				);
-			case 500:
-				throw new Error(
-					'An internal SchoolSoft error occured whilst making a request'
-				);
-			default:
-				break;
-		}
-	}
-
-	private _checkForUser() {
-		if (!this._user) {
-			throw new ReferenceError('Missing login/user information');
-		}
-	}
-
-	/**
-	 * Gets all of the schools that uses SchoolSoft
-	 */
 	public static async getSchoolList() {
-		const { data } = await axios.get(
-			`${SchoolSoft.baseURL}/rest/app/schoollist/prod`
-		);
-
-		return data as SchoolListInfo[];
+		return await fetchAndParse<SchoolListInfo[]>(`${this.baseUrl}/rest/app/schoollist/prod`);
 	}
 
-	/**
-	 * Logs into SchoolSoft and gets the token which will be used for all requests
-	 */
-	public async login(): Promise<Token> {
-		const formData = this._convertToURLParameters({
-			identification: this.username,
-			verification: this.password,
-			logintype: 4,
-			usertype: this._type
-		});
+	private get defaultStartDate() {
+		return new Date(new Date().getFullYear() - (new Date().getMonth() < 6 ? 0 : 1), 7);
+	}
 
-		// we make a response to get the JSESSIONID cookie, since its required for some reason
-		// ffs schoolsoft, please redo your api, its absolute dog wank, why do we need a cookie to login??
-		const preResponse = await axios.get(
-			`${this._url}/rest/app/login`,
-			this._baseAxiosOptions
-		);
-		this._baseAxiosOptions.headers!['Cookie'] =
-			preResponse.headers['set-cookie']?.[0].split(';')[0] ??
-			// this is just a random string from password generator, not a real password or session id
-			'JSESSIONID=97oatxRBCX4pbEDkNeoxGFx8tRRh5Efz';
+	private get defaultEndDate() {
+		return new Date(new Date().getFullYear() + (new Date().getMonth() < 6 ? 1 : 0), 6);
+	}
 
-		const options = Object.assign({}, this._baseAxiosOptions, {
-			headers: Object.assign({}, this._baseAxiosOptions.headers, {
-				'Content-Type': 'application/x-www-form-urlencoded'
-			})
-		});
+	private get url(): `${typeof SchoolSoft['baseUrl']}/${SchoolSoft['school']}` {
+		return `${SchoolSoft.baseUrl}/${this.school}`;
+	}
 
-		const response = await axios.post(
-			`${this._url}/rest/app/login`,
-			formData,
-			options
-		);
-		this._checkResponse(response.status);
+	private get orgId() {
+		return this.user.orgs[0].orgId;
+	}
 
-		this._user = response.data as User;
-		const token = await this.token();
+	private restUrl(...path: Array<string | number>) {
+		return `${this.url}/rest/app/${path.join('/')}`;
+	}
+
+	private apiUrl(...path: Array<string | number>) {
+		return `${this.url}/api/${path.join('/')}`;
+	}
+
+	public async login() {
+		const body = new URLSearchParams();
+
+		body.set('identification', this.username);
+		body.set('verification', this.password);
+		// 4 is for mobile login which is what this API wrapper imitates the device as.
+		body.set('logintype', '4');
+		body.set('usertype', userTypeFromString(this.type).toString());
+
+		const options = { ...this.baseFetchOptions };
+		options.body = body;
+		options.method = Methods.Post;
+
+		this.user = await fetchAndParse<User>(this.restUrl('login'), options);
+
+		return await this.getToken();
+	}
+
+	public async getToken() {
+		if (typeof this.user.appKey === 'undefined') {
+			throw new ReferenceError("Missing the user's app key, cannot fetch the token.");
+		}
+
+		const options = { ...this.baseFetchOptions };
+		options.headers.appkey = this.user.appKey;
+
+		const data = await fetchAndParse<Token>(this.restUrl('token'), options);
+		this.baseFetchOptions.headers.token = data.token;
+
+		return data;
+	}
+
+	public async setAppKey(appKey: User['appKey']) {
+		// @ts-expect-error: We only need `appKey` to be defined in the `user` object.
+		this.user = {
+			appKey
+		};
+
+		const token = await this.getToken();
+		this.user = await this.getUser();
+
+		this.user.appKey = appKey;
+		this.type = this.user.type;
 
 		return token;
 	}
 
 	/**
-	 * Gets the token, assuming you have the app key
+	 * Please use the `user` property instead of this function. This method exists because it's a known SchoolSoft route.
 	 */
-	public async token(): Promise<Token> {
-		this._checkForUser();
-
-		const options = Object.assign({}, this._baseAxiosOptions, {
-			headers: Object.assign({}, this._baseAxiosOptions.headers, {
-				appkey: this._user.appKey
-			})
-		});
-		const response = await axios.get(`${this._url}/rest/app/token`, options);
-		this._checkResponse(response.status);
-
-		const data = response.data as Token;
-
-		this._baseAxiosOptions = Object.assign({}, this._baseAxiosOptions, {
-			headers: Object.assign({}, this._baseAxiosOptions.headers, {
-				token: data.token
-			})
-		});
-
-		return data;
+	@CheckForToken
+	public async getUser() {
+		return await fetchAndParse<User>(this.apiUrl('user', 'get'), this.baseFetchOptions);
 	}
 
-	/**
-	 * Set the token and organization ID if you already have them, meaning you can skip logging in
-	 * @param token - The user's token
-	 * @param orgId - The user's organization ID
-	 */
-	public setTokenAndOrgId(
-		token: Token['token'],
-		orgId: User['orgs'][0]['orgId']
-	): void {
-		this._baseAxiosOptions = Object.assign({}, this._baseAxiosOptions, {
-			headers: Object.assign({}, this._baseAxiosOptions.headers, {
-				token
-			})
-		});
-		this._user = { orgs: [{ orgId }] } as User;
-	}
-
-	/**
-	 * Gets the user's info
-	 */
-	public async getUser(): Promise<User> {
-		this._checkForUser();
-
-		const response = await axios.get(
-			`${this._url}/api/user/get`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getLunchMenu() {
+		return await fetchAndParse<LunchMenu[]>(
+			this.apiUrl('lunchmenus', this.type, this.orgId),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as User;
 	}
 
-	/**
-	 * Gets the lunch menu
-	 */
-	public async getLunch(): Promise<Lunch[]> {
-		this._checkForUser();
-
-		const response = await axios.get(
-			`${this._url}/api/lunchmenus/${this.userType}/${this._user.orgs[0].orgId}`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getSchedule() {
+		return await fetchAndParse<Schedule[]>(
+			this.apiUrl('lessons', this.type, this.orgId),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as Lunch[];
 	}
 
 	/**
-	 * Gets the schedule
+	 * @param [start] - The starting week number (1-52).
+	 * @param [end] - The ending week number (1-52).
 	 */
-	public async getSchedule(): Promise<Schedule[]> {
-		this._checkForUser();
-
-		const response = await axios.get(
-			`${this._url}/api/lessons/${this.userType}/${this._user.orgs[0].orgId}`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getAbsences(start = 1, end = 52) {
+		return await fetchAndParse<Absence[]>(
+			this.apiUrl('absences', this.type, this.orgId, start, end),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as Schedule[];
 	}
 
-	/**
-	 * Gets absences from school
-	 * @param start - The starting week as integer
-	 * @param end - The ending week as integer
-	 */
-	public async getAbsences(start = 1, end = 52): Promise<Absence[]> {
-		this._checkForUser();
-
-		if (end === undefined || end === null) {
-			end = 52;
-		}
-
-		const response = await axios.get(
-			`${this._url}/api/absences/${this.userType}/${this._user.orgs[0].orgId}/${start}/${end}`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getAbsencePermissions() {
+		return await fetchAndParse<AbsencePermissions>(
+			this.apiUrl('parameters', this.type, this.orgId),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as Absence[];
 	}
 
 	/**
-	 * Gets absence permissions
+	 * @param [start] - The starting date.
+	 * @param [end] - The ending date.
 	 */
-	public async getAbsencePermissions(): Promise<AbsencePermissions> {
-		this._checkForUser();
-
-		const response = await axios.get(
-			`${this._url}/api/parameters/${this.userType}/${this._user.orgs[0].orgId}`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getAssignments(start = this.defaultStartDate, end = this.defaultEndDate) {
+		return await fetchAndParse<Assignment[]>(
+			this.apiUrl('notices', this.type, this.orgId, start.getTime(), end.getTime(), 'test'),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as AbsencePermissions;
 	}
 
 	/**
-	 * Gets assignments from a beginning to end date
-	 * @param start - The starting date
-	 * @param end - The ending date
+	 * @param id - The assignment's id.
 	 */
-	public async getAssignments(
-		start: Date | string | number,
-		end: Date | string | number
-	): Promise<Assignment[]> {
-		this._checkForUser();
-
-		const [startDate, endDate] = [
-			new Date(start).getTime(),
-			new Date(end).getTime()
-		];
-
-		const response = await axios.get(
-			`${this._url}/api/notices/${this.userType}/${this._user.orgs[0].orgId}/${startDate}/${endDate}/test`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getAssignmentInformation(id: Assignment['id']) {
+		return await fetchAndParse<AssignmentInformation>(
+			this.apiUrl('tests', this.type, this.orgId, id, 0),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as Assignment[];
 	}
 
 	/**
-	 * Gets the lessons' statuses
-	 * @param start - The starting date
-	 * @param end - The ending date
-	 * @param amountOfLessons - The amount of lessons in the day
+	 * @param id - The assignment id.
 	 */
-	public async getLessonsStatuses(
-		start: Date | string | number,
-		end: Date | string | number,
-		amountOfLessons = 5
-	): Promise<LessonStatus[]> {
-		this._checkForUser();
+	@CheckForToken
+	public async getAssignmentResult(id: Assignment['id']) {
+		return await fetchAndParse<AssignmentResult>(this.apiUrl('news', this.type, this.orgId, id));
+	}
 
-		const [startDate, endDate] = [
-			new Date(start).getTime(),
-			new Date(end).getTime()
-		];
-
-		const parameters: string[] = [];
-		for (let i = 1; i <= amountOfLessons; i++) {
-			parameters.push(`lessonstatus${this.userType}_${i}`);
-		}
-
-		const response = await axios.get(
-			`${this._url}/api/notices/${this.userType}/${
-				this._user.orgs[0].orgId
-			}/${startDate}/${endDate}/${parameters.join(',')}`,
-			this._baseAxiosOptions
+	/**
+	 * @param [start] - The starting date.
+	 * @param [end] - The ending date.
+	 */
+	@CheckForToken
+	public async getLessonStatuses(start = this.defaultStartDate, end = this.defaultEndDate) {
+		return await fetchAndParse<LessonStatus[]>(
+			this.apiUrl(
+				'notices',
+				this.type,
+				this.orgId,
+				// Start & end timestamps are flipped for some reason in the API.
+				end.getTime(),
+				start.getTime(),
+				`lessonstatus${this.type}_1`
+			),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as LessonStatus[];
 	}
 
 	/**
-	 * Gets the calendar
-	 * @param start - The starting week
-	 * @param end - The ending week
-	 * @param parameters - The types of calendar events
+	 * @param [options] - The options for the types of calendar events to include.
+	 * @param [start] - The starting date.
+	 * @param [end] - The ending date.
 	 */
+	@CheckForToken
 	public async getCalendar(
-		start: Date | string | number,
-		end: Date | string | number,
-		parameters: Array<'calendar' | 'schoolcalendar' | 'privatecalendar'>
-	): Promise<Calendar[]> {
-		this._checkForUser();
-
-		const [startDate, endDate] = [
-			new Date(start).getTime(),
-			new Date(end).getTime()
-		];
-		const urlParameters = [...new Set(parameters)].join(',');
-
-		const response = await axios.get(
-			`${this._url}/api/notices/${this.userType}/${this._user.orgs[0].orgId}/${startDate}/${endDate}/${urlParameters}`,
-			this._baseAxiosOptions
+		options: Array<CalendarObject> = ['calendar', 'schoolcalendar', 'privatecalendar'],
+		start = this.defaultStartDate,
+		end = this.defaultEndDate
+	) {
+		return await fetchAndParse<Calendar[]>(
+			this.apiUrl(
+				'notices',
+				this.type,
+				this.orgId,
+				start.getTime(),
+				end.getTime(),
+				[...new Set(options)].join(',')
+			),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as Calendar[];
 	}
 
 	/**
-	 * Gets the notices which you cannot perform actions on
-	 * @param parameters - The types of notices
+	 * @param [options] - The options for the types of notices to include.
+	 * @param [start] - The starting week number (1-52).
+	 * @param [end] - The ending week number (1-52).
 	 */
+	@CheckForToken
 	public async getNoticesLimit(
-		parameters: Array<
-			'news' | 'forum' | 'forummessage' | 'inquiry' | 'teststudent'
-		>
-	): Promise<NoticeLimit> {
-		this._checkForUser();
-
-		const urlParameters = [...new Set(parameters)].join(',');
-
-		// idk what the 0 & 52 (originally 0 & 30) means in the url, i literally cant figure it out
-		// i highly doubt it's the week number since i manually changed it and there was no pattern
-		const response = await axios.get(
-			`${this._url}/api/notices/${this.userType}/limit/${this._user.orgs[0].orgId}/0/52/${urlParameters}`,
-			this._baseAxiosOptions
+		options: Array<NoticeObject> = ['news', 'inquiry', 'teststudent', 'message'],
+		start = 0,
+		end = 52
+	) {
+		return await fetchAndParse<NoticeLimit>(
+			this.apiUrl(
+				'notices',
+				this.type,
+				'limit',
+				this.orgId,
+				start,
+				end,
+				[...new Set(options)].join(',')
+			),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
+	}
 
-		return response.data as NoticeLimit;
+	@CheckForToken
+	public async getNoticesActionable() {
+		return await fetchAndParse<NoticeActionable[]>(
+			this.apiUrl('notices', this.type, 'actionable', this.orgId),
+			this.baseFetchOptions
+		);
 	}
 
 	/**
-	 * Gets the notices which you can perform actions on
+	 * @param [options} - The options for the types of notices to include.
+	 * @param [start} - The starting week number (1-52).
+	 * @param [end} - The ending week number (1-52).
 	 */
-	public async getNoticesActionable(): Promise<NoticeActionable[]> {
-		this._checkForUser();
-
-		const response = await axios.get(
-			`${this._url}/api/notices/${this.userType}/actionable/${this._user.orgs[0].orgId}`,
-			this._baseAxiosOptions
-		);
-		this._checkResponse(response.status);
-
-		return response.data as NoticeActionable[];
-	}
-
-	/**
-	 * Gets the archived notices, returns same typedef as getNoticesLimit()
-	 * @function getNoticesLimit
-	 * @param parameters - The types of notices
-	 */
+	@CheckForToken
 	public async getNoticesArchived(
-		parameters: Array<
-			'news' | 'forum' | 'forummessage' | 'inquiry' | 'teststudent'
-		>
-	): Promise<NoticeLimit> {
-		this._checkForUser();
-
-		const urlParameters = [...new Set(parameters)].join(',');
-
-		const response = await axios.get(
-			`${this._url}/api/notices/${this.userType}/limit/archived/${this._user.orgs[0].orgId}/0/52/${urlParameters}`,
-			this._baseAxiosOptions
+		options: Array<NoticeObject> = ['news', 'inquiry', 'teststudent', 'message'],
+		start = 0,
+		end = 52
+	) {
+		return await fetchAndParse<NoticeLimit>(
+			this.apiUrl(
+				'notices',
+				this.type,
+				'limit',
+				'archived',
+				this.orgId,
+				start,
+				end,
+				[...new Set(options)].join(',')
+			),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as NoticeLimit;
 	}
 
 	/**
-	 * Gets info/results of an assignment
-	 * @param id - The ID of the assignment
+	 * @param id - The news item's id.
 	 */
-	public async getAssignmentResult(id: number): Promise<AssignmentResult> {
-		this._checkForUser();
-
-		const response = await axios.get(
-			`${this._url}/api/teststudents/${this.userType}/${this._user.orgs[0].orgId}/${id}`,
-			this._baseAxiosOptions
+	@CheckForToken
+	public async getNewsItem(id: BaseNotice['id']) {
+		return await fetchAndParse<NewsItem>(
+			this.apiUrl('news', this.type, this.orgId, id),
+			this.baseFetchOptions
 		);
-		this._checkResponse(response.status);
-
-		return response.data as AssignmentResult;
 	}
 
 	/**
-	 * Gets info of one news
-	 * @param id - The ID of the news
+	 * @param id - The news item's id.
+	 * @returns Whether the news item has been as archived.
 	 */
-	public async getNewsInfo(id: number): Promise<NewsInfo> {
-		this._checkForUser();
+	@CheckForToken
+	public async setNewsItemAsArchived(id: BaseNotice['id']) {
+		const options = { ...this.baseFetchOptions };
+		options.method = Methods.Put;
 
-		const response = await axios.get(
-			`${this._url}/api/news/${this.userType}/${this._user.orgs[0].orgId}/${id}`,
-			this._baseAxiosOptions
+		return await fetchRequest(
+			this.apiUrl('notices', this.type, 'archive', this.orgId, id),
+			options
 		);
-		this._checkResponse(response.status);
+	}
 
-		return response.data as NewsInfo;
+	/**
+	 * @param id - The news item's id.
+	 * @returns Whether the news item has been as unarchived.
+	 */
+	@CheckForToken
+	public async setNewsItemAsUnarchived(id: BaseNotice['id']) {
+		const options = { ...this.baseFetchOptions };
+		options.method = Methods.Put;
+
+		return await fetchRequest(
+			this.apiUrl('notices', this.type, 'unarchive', this.orgId, id),
+			options
+		);
+	}
+
+	/**
+	 * @param id - The news item's id.
+	 * @returns Whether the news item has been set as read.
+	 */
+	@CheckForToken
+	public async setNewsItemAsRead(id: BaseNotice['id']) {
+		return await fetchRequest(
+			this.apiUrl('notices', this.type, 'read', this.orgId, id),
+			this.baseFetchOptions
+		);
+	}
+
+	/**
+	 * @param id - The news item's id.
+	 * @returns Whether the news item has been set as unread.
+	 */
+	@CheckForToken
+	public async setNewsItemAsUnread(id: BaseNotice['id']) {
+		return await fetchRequest(
+			this.apiUrl('notices', this.type, 'unread', this.orgId, id),
+			this.baseFetchOptions
+		);
 	}
 }
 
-export * from './types';
+/**
+ * Initializes the SchoolSoft class and logs in. This is the recommended way of connecting/logging in.
+ * @returns The logged in SchoolSoft instance.
+ */
+export async function connect(...parameters: ConstructorParameters<typeof SchoolSoft>) {
+	const user = new SchoolSoft(...parameters);
+	await user.login();
+
+	return user;
+}
+
+/**
+ * Initializes the SchoolSoft class and logs in with the app key and school.
+ * @param appKey - The user's app key.
+ * @param school - The user's school.
+ * @returns The logged in SchoolSoft instance.
+ */
+export async function connectWithAppKeyAndSchool(
+	appKey: User['appKey'],
+	school: ConstructorParameters<typeof SchoolSoft>[2]
+) {
+	const user = new SchoolSoft('', '', school);
+	await user.setAppKey(appKey);
+
+	return user;
+}
+
+export * from './enums/index.js';

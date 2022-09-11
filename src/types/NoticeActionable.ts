@@ -1,28 +1,9 @@
-import { BaseNotice } from '.';
+import type { BaseNotice, JsonInformation, NoticeObject } from '.';
 
 export interface NoticeActionable extends BaseNotice {
-	object:
-		| 'message'
-		| 'news'
-		| 'forum'
-		| 'forummessage'
-		| 'inquiry'
-		| 'teststudent';
+	object: NoticeObject;
 	/**
-	 * Sometimes needs to be converted to object via JSON.parse()
+	 * Sometimes needs to be converted to an object via JSON.parse().
 	 */
-	json: {
-		creByName: string;
-		contentPreview: string;
-		title: string;
-		/**
-		 * Can be converted to date
-		 */
-		fromDate?: string;
-		allDay?: number;
-		/**
-		 * Can be converted to date
-		 */
-		endDate?: string;
-	};
+	json: JsonInformation;
 }

@@ -1,6 +1,3 @@
-/**
- * Schedule API response
- */
 export interface Schedule {
 	weeks: number;
 	excludingWeeks: number;
@@ -10,13 +7,13 @@ export interface Schedule {
 	subjectId: number;
 	orgId: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	updDate: string;
 	updByType: number;
 	excludeClass: number;
 	/**
-	 * Can be converted to date -> time
+	 * Can be converted to a date (1970-01-01 HH:mm:ss.S) -> time.
 	 */
 	startTime: string;
 	id: number;
@@ -25,7 +22,7 @@ export interface Schedule {
 	updById: number;
 	creByType: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	creDate: string;
 	length: number;
@@ -38,7 +35,7 @@ export interface Schedule {
 	absenceType: number;
 	excludingWeeksString: string;
 	/**
-	 * Can be converted to date -> time
+	 * Can be converted to a date (1970-01-01 HH:mm:ss.S) -> time.
 	 */
 	endTime: string;
 	weeksString: string;

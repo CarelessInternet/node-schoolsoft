@@ -6,11 +6,11 @@ export interface BaseNotice {
 	creByType: number;
 	updByType: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	creDate: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	updDate: number;
 	objectId1: number;
@@ -27,22 +27,22 @@ export interface BaseNotice {
 	childId: number;
 	responseText: string;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
-	confirmDate: string | null;
+	confirmDate?: string;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
-	readDate: string | null;
+	readDate?: string;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	fromDate: number;
 	infoDate: string;
 	infoImage: string;
 	deleted: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	nuUpdDate: number;
 	nuDeleted: number;
