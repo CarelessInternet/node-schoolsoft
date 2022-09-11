@@ -1,25 +1,28 @@
 <div align="center">
-  <img src="https://img.shields.io/npm/v/schoolsoft">
-  <img src="https://img.shields.io/npm/l/schoolsoft">
-  <img src="https://img.shields.io/node/v/schoolsoft?color=orange">
-  <img src="https://img.shields.io/npm/dw/schoolsoft">
-  <img src="https://img.shields.io/npm/types/schoolsoft">
-  <img src="https://img.shields.io/github/commit-activity/m/CarelessInternet/node-schoolsoft?color=red">
-  <img src="https://img.shields.io/github/issues/CarelessInternet/node-schoolsoft">
-  <img src="https://img.shields.io/github/issues-pr/CarelessInternet/node-schoolsoft?color=yellow">
+  <a href="https://www.npmjs.com/package/schoolsoft">
+    <img src="https://img.shields.io/npm/v/schoolsoft" />
+  </a>
+  <img src="https://img.shields.io/npm/l/schoolsoft" />
+  <img src="https://img.shields.io/node/v/schoolsoft?color=orange" />
+  <img src="https://img.shields.io/npm/dw/schoolsoft" />
+  <img src="https://img.shields.io/npm/types/schoolsoft" />
+  <img src="https://img.shields.io/github/commit-activity/m/CarelessInternet/node-schoolsoft?color=red" />
 </div>
 
 # node-schoolsoft
 
-SchoolSoft API wrapper for both browser and Node.js!
+A SchoolSoft API wrapper for both the browser and Node.js!
+
+## Features
+
+* Zero dependencies!
+* Utilises the native `fetch` API!
+  * Works with the browser, Node.js v18+, and frameworks that implement the `fetch` API like Next.js!
+* Uses ESM instead of CommonJS!
 
 ## Disclaimer
 
-This has not been tested with guardian nor staff accounts, so please be aware that it might not work for those
-
-## Documentation
-
-Documentation can be found in the [wiki section](https://github.com/CarelessInternet/node-schoolsoft/wiki)
+This library has not been tested with guardian nor staff accounts, so please be aware that it's highly likely they won't work with this API wrapper.
 
 ## Installation
 
@@ -27,18 +30,18 @@ Documentation can be found in the [wiki section](https://github.com/CarelessInte
 npm i schoolsoft
 ```
 
+## Documentation
+
+No documentation yet, but check out [`the source code`](src/index.ts) and [`the testing file`](__tests__/instance/SchoolSoft.Test.ts) for all methods available.
+
 ## Testing
 
-Testing is implemented with `jest`, and run against test cases on every push commit.
+Testing is implemented with `jest`. Here's how to run the tests cases:
 
-### Manually Testing
+1. Create a `.env` file with the environment variables found in [`__tests__/environment.d.ts`](__tests__/environment.d.ts) in the root directory.
 
-1. Create a `.env` file with the following environment variables:
-  * SCHOOL
-  * SCHOOL_USERNAME
-  * SCHOOL_PASSWORD
+2. Run the test cases with `npm test`.
 
-2. Run the test cases with `npm test`
 ## Credits
 
-Thank you to [this repository](https://github.com/Blatzar/schoolsoft-api-app) for giving me a head start
+Thank you to [this repository](https://github.com/Blatzar/schoolsoft-api-app) for giving me a head start.

@@ -1,25 +1,22 @@
-/**
- * Lunch API response
- */
-export interface Lunch {
+export interface LunchMenu {
 	saturday: string;
 	week: number;
 	updById: number;
 	creByType: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	creDate: string;
 	dishCategoryName: string;
 	creById: number;
 	thursday: string;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	dates: string[];
 	orgId: number;
 	/**
-	 * Can be converted to date
+	 * Can be converted to a date.
 	 */
 	updDate: string;
 	empty: boolean;

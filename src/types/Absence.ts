@@ -1,8 +1,7 @@
-/**
- * Absences API response
- */
+import type { LessonStatusJson } from './LessonStatus';
+
 export interface Absence {
 	week: number;
-	lessonIds: number[];
+	lessonIds: LessonStatusJson['lessonId'][];
 	dayIds: number[];
 }

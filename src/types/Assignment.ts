@@ -1,19 +1,10 @@
-import { BaseNotice } from '.';
+import type { BaseNotice, JsonInformation } from '.';
+
+export interface AssignmentJson extends JsonInformation {
+	studentfileupload?: number;
+}
 
 export interface Assignment extends BaseNotice {
 	object: 'test';
-	json: {
-		/**
-		 * Can be converted to date
-		 */
-		fromDate: string;
-		/**
-		 * Can be converted to date
-		 */
-		endDate: string;
-		creByName: string;
-		contentPreview: string;
-		title: string;
-		studentfileupload?: number;
-	};
+	json: AssignmentJson;
 }

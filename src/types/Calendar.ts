@@ -1,19 +1,8 @@
-import { BaseNotice } from '.';
+import type { BaseNotice, JsonInformation } from '.';
+
+export type CalendarObject = 'calendar' | 'schoolcalendar' | 'privatecalendar';
 
 export interface Calendar extends BaseNotice {
-	object: 'calendar' | 'schoolcalendar' | 'privatecalendar';
-	json: {
-		/**
-		 * Can be converted to date
-		 */
-		fromDate: string;
-		allDay: number;
-		/**
-		 * Can be converted to date
-		 */
-		endDate: string;
-		creByName: string;
-		contentPreview: string;
-		title: string;
-	};
+	object: CalendarObject;
+	json: JsonInformation;
 }

@@ -1,36 +1,17 @@
-import { BaseNotice } from '.';
+import type { BaseNotice, JsonInformation, NoticeObject } from '.';
 
-interface Notice extends BaseNotice {
-	object:
-		| 'message'
-		| 'news'
-		| 'forum'
-		| 'forummessage'
-		| 'inquiry'
-		| 'teststudent';
+export interface Notice extends BaseNotice {
+	object: NoticeObject;
 	/**
-	 * Sometimes needs to be converted to object via JSON.parse()
+	 * Sometimes needs to be converted to an object via JSON.parse().
 	 */
-	json: {
-		creByName: string;
-		contentPreview: string;
-		title: string;
-		/**
-		 * Can be converted to date
-		 */
-		fromDate?: string;
-		allDay?: number;
-		/**
-		 * Can be converted to date
-		 */
-		endDate?: string;
-	};
+	json: JsonInformation;
 }
 
 export interface NoticeLimit {
 	notices: Notice[];
 	/**
-	 * Usually increments by 16 for every +1 on second to last parameter
+	 * Usually increments by 16 for every +1 on the second to last API parameter.
 	 */
 	lastUsedOffset: number;
 }
