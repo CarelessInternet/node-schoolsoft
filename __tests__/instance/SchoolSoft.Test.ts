@@ -32,8 +32,9 @@ describe('SchoolSoft Methods', () => {
 	});
 
 	runIfHasCredentials('Methods With Credentials', () => {
-		it('login', async () => {
-			user = await connect(env.SCHOOL_USERNAME, env.SCHOOL_PASSWORD, env.SCHOOL);
+		it('log in', async () => {
+			/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
+			user = await connect(env.SCHOOL_USERNAME!, env.SCHOOL_PASSWORD!, env.SCHOOL!);
 			expect(user).toBeInstanceOf(SchoolSoft);
 		});
 
@@ -237,41 +238,50 @@ describe('SchoolSoft Methods', () => {
 			const notices = await user.getNoticesLimit();
 
 			if (notices.notices.length > 0) {
-				await expect(user.setNewsItemAsArchived(notices.notices[0].id)).resolves.toStrictEqual(
+				await expect(user.setNoticeAsArchived(notices.notices[0].id)).resolves.toStrictEqual(true);
+			}
+		});
+
+		it('set news item as unarchived', async () => {
+			const notices = await user.getNoticesLimit();
+
+			if (notices.notices.length > 0) {
+				await expect(user.setNoticeAsUnarchived(notices.notices[0].id)).resolves.toStrictEqual(
 					true
 				);
 			}
 		});
 
-		it('sets news item as unarchived', async () => {
+		it('set news item as unread', async () => {
 			const notices = await user.getNoticesLimit();
 
 			if (notices.notices.length > 0) {
-				await expect(user.setNewsItemAsUnarchived(notices.notices[0].id)).resolves.toStrictEqual(
-					true
-				);
+				await expect(user.setNoticeAsUnread(notices.notices[0].id)).resolves.toStrictEqual(true);
 			}
 		});
 
-		it('sets news item as unread', async () => {
+		it('set news item as read', async () => {
 			const notices = await user.getNoticesLimit();
 
 			if (notices.notices.length > 0) {
-				await expect(user.setNewsItemAsUnread(notices.notices[0].id)).resolves.toStrictEqual(true);
+				await expect(user.setNoticeAsRead(notices.notices[0].id)).resolves.toStrictEqual(true);
 			}
 		});
 
-		it('sets news item as read', async () => {
-			const notices = await user.getNoticesLimit();
+		it('set actionable notice as confirmed', async () => {
+			const notices = await user.getNoticesActionable();
 
-			if (notices.notices.length > 0) {
-				await expect(user.setNewsItemAsRead(notices.notices[0].id)).resolves.toStrictEqual(true);
+			if (notices.length > 0) {
+				await expect(
+					user.setNoticeActionableAsConfirmed(notices[0].id, 'test')
+				).resolves.toStrictEqual(true);
 			}
 		});
 
-		it('login via setting the app key', async () => {
+		it('log in via setting the app key', async () => {
 			await expect(
-				connectWithAppKeyAndSchool(user.user.appKey, env.SCHOOL)
+				/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
+				connectWithAppKeyAndSchool(user.user.appKey, env.SCHOOL!)
 			).resolves.toBeInstanceOf(SchoolSoft);
 		});
 	});

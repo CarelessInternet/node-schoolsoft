@@ -7,3 +7,7 @@ export interface NoticeActionable extends BaseNotice {
 	 */
 	json: JsonInformation;
 }
+
+export interface NoticeActionableResponse {
+	responseText: string;
+}

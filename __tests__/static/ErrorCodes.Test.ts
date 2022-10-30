@@ -1,7 +1,7 @@
 import { checkResponseStatus, ErrorCodes } from '../../src/index.js';
 
 describe('Error Codes', () => {
-	it('throws on error code 401', () => {
+	it('throw on error code 401', () => {
 		expect(() => {
 			checkResponseStatus(ErrorCodes.Unauthorized);
 		}).toThrowError(Error);
@@ -31,7 +31,7 @@ describe('Error Codes', () => {
 		}).toThrowError(Error);
 	});
 
-	it("doesn't throw an error on unchecked error code", () => {
+	it('not throw an error on an unchecked error code', () => {
 		expect(() => {
 			checkResponseStatus(100);
 		}).not.toThrowError();
