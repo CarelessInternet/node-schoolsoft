@@ -16,14 +16,14 @@ A SchoolSoft API wrapper for both the browser and Node.js!
 ## Features
 
 * Zero dependencies!
-* Built with TypeScript!
+* Built with TypeScript and comes with types!
 * Utilises the native `fetch` API!
   * Works with the browser, Node.js v18+, and frameworks that implement the `fetch` API like Next.js!
 * Uses ESM instead of CommonJS!
 
 ## Disclaimer
 
-This library has not been tested with guardian nor staff accounts, so please be aware that it's highly likely they won't work with this API wrapper.
+This library has not been tested with guardian nor staff accounts, so please be aware that it's highly unlikely they will work with this API wrapper.
 
 ## Installation
 
@@ -37,7 +37,7 @@ No documentation yet, but check out [`the source code`](src/index.ts) and [`the 
 
 ## Testing
 
-Testing is implemented with `jest`. Here's how to run the tests cases:
+Testing is implemented with `jest`. Here's how to run the test cases:
 
 1. Create a `.env` file with the environment variables found in [`__tests__/environment.d.ts`](__tests__/environment.d.ts) in the root directory.
 
