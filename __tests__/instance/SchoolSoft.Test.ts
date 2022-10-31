@@ -273,7 +273,7 @@ describe('SchoolSoft Methods', () => {
 
 			if (notices.length > 0) {
 				await expect(
-					user.setNoticeActionableAsConfirmed(notices[0].id, 'test')
+					user.setNoticeActionableAsConfirmed(notices[0].id, 'cool')
 				).resolves.toStrictEqual(true);
 			}
 		});
