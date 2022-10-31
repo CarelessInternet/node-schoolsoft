@@ -8,19 +8,25 @@ export enum ErrorCodes {
 
 export function checkResponseStatus(status: ErrorCodes) {
 	switch (status) {
-		case ErrorCodes.Unauthorized:
+		case ErrorCodes.Unauthorized: {
 			throw new Error('Invalid username, password, token, or missing permissions.');
-		case ErrorCodes.NotFound:
+		}
+		case ErrorCodes.NotFound: {
 			throw new TypeError(
 				'Resource could not been found, either an invalid URL or parameters passed.'
 			);
-		case ErrorCodes.MethodNotAllowed:
+		}
+		case ErrorCodes.MethodNotAllowed: {
 			throw new TypeError('Wrong method requested to the API.');
-		case ErrorCodes.UnsupportedMediaType:
+		}
+		case ErrorCodes.UnsupportedMediaType: {
 			throw new Error('An unsupported media type was requested as the Content-Type header.');
-		case ErrorCodes.InternalServerError:
+		}
+		case ErrorCodes.InternalServerError: {
 			throw new Error('An internal SchoolSoft error occured whilst making a request.');
-		default:
+		}
+		default: {
 			break;
+		}
 	}
 }

@@ -14,6 +14,7 @@ import type {
 	LunchMenu,
 	NewsItem,
 	NoticeActionable,
+	NoticeActionableResponse,
 	NoticeLimit,
 	NoticeObject,
 	Schedule,
@@ -25,10 +26,11 @@ import type {
 interface CustomRequestInit extends Omit<RequestInit, 'headers'> {
 	headers: {
 		appos: 'ios';
-		appversion: '2.3.12';
+		appversion: '2.3.14';
 		deviceid: 'node-schoolsoft';
 		appkey?: User['appKey'];
 		token?: Token['token'];
+		'Content-Type'?: 'application/json';
 	};
 }
 
@@ -44,7 +46,7 @@ export class SchoolSoft {
 	public readonly baseFetchOptions: CustomRequestInit = {
 		headers: {
 			appos: 'ios',
-			appversion: '2.3.12',
+			appversion: '2.3.14',
 			// Value doesn't matter, but the key & value is needed.
 			deviceid: 'node-schoolsoft'
 		},
@@ -295,9 +297,9 @@ export class SchoolSoft {
 	}
 
 	/**
-	 * @param [options} - The options for the types of notices to include.
-	 * @param [start} - The starting week number (1-52).
-	 * @param [end} - The ending week number (1-52).
+	 * @param [options] - The options for the types of notices to include.
+	 * @param [start] - The starting week number (1-52).
+	 * @param [end] - The ending week number (1-52).
 	 */
 	@CheckForToken
 	public async getNoticesArchived(
@@ -336,7 +338,7 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been as archived.
 	 */
 	@CheckForToken
-	public async setNewsItemAsArchived(id: BaseNotice['id']) {
+	public async setNoticeAsArchived(id: BaseNotice['id']) {
 		const options = { ...this.baseFetchOptions };
 		options.method = Methods.Put;
 
@@ -351,7 +353,7 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been as unarchived.
 	 */
 	@CheckForToken
-	public async setNewsItemAsUnarchived(id: BaseNotice['id']) {
+	public async setNoticeAsUnarchived(id: BaseNotice['id']) {
 		const options = { ...this.baseFetchOptions };
 		options.method = Methods.Put;
 
@@ -366,7 +368,7 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been set as read.
 	 */
 	@CheckForToken
-	public async setNewsItemAsRead(id: BaseNotice['id']) {
+	public async setNoticeAsRead(id: BaseNotice['id']) {
 		return await fetchRequest(
 			this.apiUrl('notices', this.type, 'read', this.orgId, id),
 			this.baseFetchOptions
@@ -378,10 +380,32 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been set as unread.
 	 */
 	@CheckForToken
-	public async setNewsItemAsUnread(id: BaseNotice['id']) {
+	public async setNoticeAsUnread(id: BaseNotice['id']) {
 		return await fetchRequest(
 			this.apiUrl('notices', this.type, 'unread', this.orgId, id),
 			this.baseFetchOptions
+		);
+	}
+
+	/**
+	 * @param id - The news item's id.
+	 * @param [responseText] - The text to send as a response.
+	 * @returns Whether the actionable notice item has been set as confirmed.
+	 */
+	@CheckForToken
+	public async setNoticeActionableAsConfirmed(
+		id: BaseNotice['id'],
+		responseText: NoticeActionableResponse['responseText'] = ''
+	) {
+		const options = { ...this.baseFetchOptions };
+
+		options.method = Methods.Post;
+		options.headers['Content-Type'] = 'application/json';
+		options.body = JSON.stringify({ responseText } as NoticeActionableResponse);
+
+		return await fetchRequest(
+			this.apiUrl('notices', this.type, 'confirm', this.orgId, id),
+			options
 		);
 	}
 }
