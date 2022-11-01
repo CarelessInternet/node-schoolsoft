@@ -9,7 +9,9 @@ export function CheckForToken(_: Object, __: string, descriptor: PropertyDescrip
 			throw new ReferenceError("Missing the user's token, cannot perform operation.");
 		}
 
-		/* eslint-disable @typescript-eslint/no-unsafe-return */
+		// We disable no-return-await and return the awaited version of the function
+		// to avoid redundancy of returning an awaited promise in every "async" method.
+		/* eslint-disable @typescript-eslint/no-unsafe-return, no-return-await */
 		return await Reflect.apply(original, this, arguments);
 	};
 
