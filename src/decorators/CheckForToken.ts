@@ -4,7 +4,7 @@ import type { SchoolSoft } from '..';
 export function CheckForToken(_: Object, __: string, descriptor: PropertyDescriptor) {
 	const original = descriptor.value as () => void;
 
-	// This is an async function so that any errors thrown will be caught in a reject.
+	// This is an async function so that any errors thrown will always be caught in a reject.
 	/* eslint-disable-next-line @typescript-eslint/require-await */
 	descriptor.value = async function (this: SchoolSoft) {
 		if (typeof this.baseFetchOptions.headers.token === 'undefined') {
