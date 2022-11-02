@@ -27,8 +27,14 @@ const runIfHasCredentials =
 describe('SchoolSoft Methods', () => {
 	let user: SchoolSoft;
 
-	it('fail to fetch without credentials', async () => {
-		await expect(new SchoolSoft('', '', '').getLunchMenu()).rejects.toThrowError(ReferenceError);
+	describe('Methods Without Credentials', () => {
+		it('fail to log in', async () => {
+			await expect(new SchoolSoft('', '', '').login()).rejects.toThrowError(Error);
+		});
+
+		it('fail to fetch without credentials', async () => {
+			await expect(new SchoolSoft('', '', '').getLunchMenu()).rejects.toThrowError(ReferenceError);
+		});
 	});
 
 	runIfHasCredentials('Methods With Credentials', () => {
