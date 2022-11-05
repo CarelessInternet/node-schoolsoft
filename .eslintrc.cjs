@@ -23,6 +23,7 @@ module.exports = {
 		// ESLint Plugin Unicorn rules from error to off:
 		'unicorn/filename-case': ['error', { case: 'pascalCase', ignore: [/environment/] }],
 		// ESLint rules from error to off:
+		'no-return-await': 'error',
 		'prefer-rest-params': 'off'
 	}
 };

@@ -60,7 +60,7 @@ export class SchoolSoft {
 	 * @param username - The username of the account.
 	 * @param password - The password of the account.
 	 * @param school - The school of the account.
-	 * @param [type] - The type of the account. The default type is student.
+	 * @param [type] - The type of the account, the default is student.
 	 */
 	public constructor(
 		private readonly username: string,
@@ -69,8 +69,8 @@ export class SchoolSoft {
 		private type: UserTypes = UserTypes.Student
 	) {}
 
-	public static async getSchoolList() {
-		return await fetchAndParse<SchoolListInfo[]>(`${this.baseUrl}/rest/app/schoollist/prod`);
+	public static getSchoolList() {
+		return fetchAndParse<SchoolListInfo[]>(`${this.baseUrl}/rest/app/schoollist/prod`);
 	}
 
 	private get defaultStartDate() {
@@ -112,7 +112,7 @@ export class SchoolSoft {
 
 		this.user = await fetchAndParse<User>(this.restUrl('login'), options);
 
-		return await this.getToken();
+		return this.getToken();
 	}
 
 	public async getToken() {
@@ -148,21 +148,21 @@ export class SchoolSoft {
 	 * Please use the `user` property instead of this function. This method exists because it's a known SchoolSoft route.
 	 */
 	@CheckForToken
-	public async getUser() {
-		return await fetchAndParse<User>(this.apiUrl('user', 'get'), this.baseFetchOptions);
+	public getUser() {
+		return fetchAndParse<User>(this.apiUrl('user', 'get'), this.baseFetchOptions);
 	}
 
 	@CheckForToken
-	public async getLunchMenu() {
-		return await fetchAndParse<LunchMenu[]>(
+	public getLunchMenu() {
+		return fetchAndParse<LunchMenu[]>(
 			this.apiUrl('lunchmenus', this.type, this.orgId),
 			this.baseFetchOptions
 		);
 	}
 
 	@CheckForToken
-	public async getSchedule() {
-		return await fetchAndParse<Schedule[]>(
+	public getSchedule() {
+		return fetchAndParse<Schedule[]>(
 			this.apiUrl('lessons', this.type, this.orgId),
 			this.baseFetchOptions
 		);
@@ -173,16 +173,16 @@ export class SchoolSoft {
 	 * @param [end] - The ending week number (1-52).
 	 */
 	@CheckForToken
-	public async getAbsences(start = 1, end = 52) {
-		return await fetchAndParse<Absence[]>(
+	public getAbsences(start = 1, end = 52) {
+		return fetchAndParse<Absence[]>(
 			this.apiUrl('absences', this.type, this.orgId, start, end),
 			this.baseFetchOptions
 		);
 	}
 
 	@CheckForToken
-	public async getAbsencePermissions() {
-		return await fetchAndParse<AbsencePermissions>(
+	public getAbsencePermissions() {
+		return fetchAndParse<AbsencePermissions>(
 			this.apiUrl('parameters', this.type, this.orgId),
 			this.baseFetchOptions
 		);
@@ -193,8 +193,8 @@ export class SchoolSoft {
 	 * @param [end] - The ending date.
 	 */
 	@CheckForToken
-	public async getAssignments(start = this.defaultStartDate, end = this.defaultEndDate) {
-		return await fetchAndParse<Assignment[]>(
+	public getAssignments(start = this.defaultStartDate, end = this.defaultEndDate) {
+		return fetchAndParse<Assignment[]>(
 			this.apiUrl('notices', this.type, this.orgId, start.getTime(), end.getTime(), 'test'),
 			this.baseFetchOptions
 		);
@@ -204,8 +204,8 @@ export class SchoolSoft {
 	 * @param id - The assignment's id.
 	 */
 	@CheckForToken
-	public async getAssignmentInformation(id: Assignment['id']) {
-		return await fetchAndParse<AssignmentInformation>(
+	public getAssignmentInformation(id: Assignment['id']) {
+		return fetchAndParse<AssignmentInformation>(
 			this.apiUrl('tests', this.type, this.orgId, id, 0),
 			this.baseFetchOptions
 		);
@@ -215,8 +215,8 @@ export class SchoolSoft {
 	 * @param id - The assignment id.
 	 */
 	@CheckForToken
-	public async getAssignmentResult(id: Assignment['id']) {
-		return await fetchAndParse<AssignmentResult>(this.apiUrl('news', this.type, this.orgId, id));
+	public getAssignmentResult(id: Assignment['id']) {
+		return fetchAndParse<AssignmentResult>(this.apiUrl('news', this.type, this.orgId, id));
 	}
 
 	/**
@@ -224,8 +224,8 @@ export class SchoolSoft {
 	 * @param [end] - The ending date.
 	 */
 	@CheckForToken
-	public async getLessonStatuses(start = this.defaultStartDate, end = this.defaultEndDate) {
-		return await fetchAndParse<LessonStatus[]>(
+	public getLessonStatuses(start = this.defaultStartDate, end = this.defaultEndDate) {
+		return fetchAndParse<LessonStatus[]>(
 			this.apiUrl(
 				'notices',
 				this.type,
@@ -245,12 +245,12 @@ export class SchoolSoft {
 	 * @param [end] - The ending date.
 	 */
 	@CheckForToken
-	public async getCalendar(
+	public getCalendar(
 		options: Array<CalendarObject> = ['calendar', 'schoolcalendar', 'privatecalendar'],
 		start = this.defaultStartDate,
 		end = this.defaultEndDate
 	) {
-		return await fetchAndParse<Calendar[]>(
+		return fetchAndParse<Calendar[]>(
 			this.apiUrl(
 				'notices',
 				this.type,
@@ -269,12 +269,12 @@ export class SchoolSoft {
 	 * @param [end] - The ending week number (1-52).
 	 */
 	@CheckForToken
-	public async getNoticesLimit(
+	public getNoticesLimit(
 		options: Array<NoticeObject> = ['news', 'inquiry', 'teststudent', 'message'],
 		start = 0,
 		end = 52
 	) {
-		return await fetchAndParse<NoticeLimit>(
+		return fetchAndParse<NoticeLimit>(
 			this.apiUrl(
 				'notices',
 				this.type,
@@ -289,8 +289,8 @@ export class SchoolSoft {
 	}
 
 	@CheckForToken
-	public async getNoticesActionable() {
-		return await fetchAndParse<NoticeActionable[]>(
+	public getNoticesActionable() {
+		return fetchAndParse<NoticeActionable[]>(
 			this.apiUrl('notices', this.type, 'actionable', this.orgId),
 			this.baseFetchOptions
 		);
@@ -302,12 +302,12 @@ export class SchoolSoft {
 	 * @param [end] - The ending week number (1-52).
 	 */
 	@CheckForToken
-	public async getNoticesArchived(
+	public getNoticesArchived(
 		options: Array<NoticeObject> = ['news', 'inquiry', 'teststudent', 'message'],
 		start = 0,
 		end = 52
 	) {
-		return await fetchAndParse<NoticeLimit>(
+		return fetchAndParse<NoticeLimit>(
 			this.apiUrl(
 				'notices',
 				this.type,
@@ -326,8 +326,8 @@ export class SchoolSoft {
 	 * @param id - The news item's id.
 	 */
 	@CheckForToken
-	public async getNewsItem(id: BaseNotice['id']) {
-		return await fetchAndParse<NewsItem>(
+	public getNewsItem(id: BaseNotice['id']) {
+		return fetchAndParse<NewsItem>(
 			this.apiUrl('news', this.type, this.orgId, id),
 			this.baseFetchOptions
 		);
@@ -338,14 +338,11 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been as archived.
 	 */
 	@CheckForToken
-	public async setNoticeAsArchived(id: BaseNotice['id']) {
+	public setNoticeAsArchived(id: BaseNotice['id']) {
 		const options = { ...this.baseFetchOptions };
 		options.method = Methods.Put;
 
-		return await fetchRequest(
-			this.apiUrl('notices', this.type, 'archive', this.orgId, id),
-			options
-		);
+		return fetchRequest(this.apiUrl('notices', this.type, 'archive', this.orgId, id), options);
 	}
 
 	/**
@@ -353,14 +350,11 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been as unarchived.
 	 */
 	@CheckForToken
-	public async setNoticeAsUnarchived(id: BaseNotice['id']) {
+	public setNoticeAsUnarchived(id: BaseNotice['id']) {
 		const options = { ...this.baseFetchOptions };
 		options.method = Methods.Put;
 
-		return await fetchRequest(
-			this.apiUrl('notices', this.type, 'unarchive', this.orgId, id),
-			options
-		);
+		return fetchRequest(this.apiUrl('notices', this.type, 'unarchive', this.orgId, id), options);
 	}
 
 	/**
@@ -368,8 +362,8 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been set as read.
 	 */
 	@CheckForToken
-	public async setNoticeAsRead(id: BaseNotice['id']) {
-		return await fetchRequest(
+	public setNoticeAsRead(id: BaseNotice['id']) {
+		return fetchRequest(
 			this.apiUrl('notices', this.type, 'read', this.orgId, id),
 			this.baseFetchOptions
 		);
@@ -380,8 +374,8 @@ export class SchoolSoft {
 	 * @returns Whether the news item has been set as unread.
 	 */
 	@CheckForToken
-	public async setNoticeAsUnread(id: BaseNotice['id']) {
-		return await fetchRequest(
+	public setNoticeAsUnread(id: BaseNotice['id']) {
+		return fetchRequest(
 			this.apiUrl('notices', this.type, 'unread', this.orgId, id),
 			this.baseFetchOptions
 		);
@@ -393,7 +387,7 @@ export class SchoolSoft {
 	 * @returns Whether the actionable notice item has been set as confirmed.
 	 */
 	@CheckForToken
-	public async setNoticeActionableAsConfirmed(
+	public setNoticeActionableAsConfirmed(
 		id: BaseNotice['id'],
 		responseText: NoticeActionableResponse['responseText'] = ''
 	) {
@@ -403,10 +397,7 @@ export class SchoolSoft {
 		options.headers['Content-Type'] = 'application/json';
 		options.body = JSON.stringify({ responseText } as NoticeActionableResponse);
 
-		return await fetchRequest(
-			this.apiUrl('notices', this.type, 'confirm', this.orgId, id),
-			options
-		);
+		return fetchRequest(this.apiUrl('notices', this.type, 'confirm', this.orgId, id), options);
 	}
 }
 
