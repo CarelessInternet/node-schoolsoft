@@ -29,7 +29,7 @@ describe('SchoolSoft Methods', () => {
 
 	describe('Methods Without Credentials', () => {
 		it('fail to log in', async () => {
-			await expect(new SchoolSoft('', '', '').login()).rejects.toThrowError(Error);
+			await expect(connect('', '', '')).rejects.toThrowError(Error);
 		});
 
 		it('fail to fetch without credentials', async () => {
